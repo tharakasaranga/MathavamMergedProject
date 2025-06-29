@@ -1,0 +1,143 @@
+import { useState, useMemo } from "react"; // Added useMemo for potential optimization
+import scores from "./Scores"; // Assuming this file exists and exports the scores array
+
+function BaseForm({ questions, onSubmit, formTitle, isSubmitting }) {
+  const [responses, setResponses] = useState({});
+  const [comments, setComments] = useState("");
+
+  const handleChange = (qid, score, quadrant) => {
+    setResponses((prev) => ({ ...prev, [qid]: {score:Number(score), quadrant: quadrant} }));
+  };
+
+  // Modified totalScore calculation
+  const totalScore = useMemo(() => {
+    let sum = 0;
+    questions.forEach((question) => {
+      // Only include in score if the question is not marked for exclusion
+      if (!question.excludeFromScore) {
+        const responseValue = responses[question.qid];
+        // Ensure a response exists for this question and it's a valid number
+        if (responseValue !== undefined && responseValue !== null) {
+          const numericValue = Number(responseValue);
+          if (!isNaN(numericValue)) {
+            sum += numericValue;
+          }
+        }
+      }
+    });
+    return sum;
+  }, [responses, questions]); // Recalculate when responses or questions change
+
+  return (
+    <div className="w-full bg-white rounded-3xl shadow-md p-6 mb-6">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          // Ensure all questions (that are not excluded) have a response if 'required'
+          // is meant to be strict for scorable items.
+          // This basic check is already handled by the `required` attribute on inputs.
+          onSubmit({ responses, comments, totalScore, formTitle });
+        }}
+        className="space-y-6"
+      >
+        <div className="overflow-visible">
+          <table className="min-w-full text-sm text-left text-gray-700 border-t border-b border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2">My child...</th>
+                {scores.map((score, index) => (
+                  <th
+                    key={`score-th-${index}`} // More unique key
+                    className="relative group px-4 py-2 text-center"
+                  >
+                    <span className="text-gray-900 font-medium relative">
+                      {score.rate}
+                      <div className="absolute left-1/2 transform -translate-x-1/2 -top-16 w-44 p-2 text-xs bg-gray-800 text-white rounded shadow-lg invisible group-hover:visible transition-all duration-300 z-50">
+                        {score.text}
+                        <br />
+                        {score.percent}
+                      </div>
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {questions.map((question) => (
+                <tr
+                  key={question.qid}
+                  className="border-t border-gray-200 hover:bg-gray-50"
+                >
+                  {/* Display an asterisk or note for questions not included in the score */}
+                  <td className="px-4 py-2">
+                    {question.text}
+                    {question.excludeFromScore && (
+                      <span className="text-blue-500 ml-1">*</span>
+                    )}
+                  </td>
+                  {scores.map(
+                    (
+                      score,
+                      scoreIndex // Added scoreIndex for key
+                    ) => (
+                      <td
+                        key={`score-opt-${question.qid}-${score.rate}-${scoreIndex}`}
+                        className="px-4 py-2 text-center"
+                      >
+                        {" "}
+                        {/* More unique key */}
+                        <input
+                          type="radio"
+                          name={`q${question.qid}`}
+                          value={score.rate} // This is the value that will be summed (e.g., "0", "1", "2")
+                          checked={responses[question.qid] === score.rate}
+                          onChange={() =>
+                            handleChange(question.qid, score.rate)
+                          }
+                          required // This ensures a selection is made for every question row
+                          className="accent-green-600"
+                        />
+                      </td>
+                    )
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">
+            {formTitle} Raw Score: {totalScore}
+          </h3>
+        </div>
+
+        <div>
+          <label
+            htmlFor="comments"
+            className="block text-lg font-semibold text-gray-800 mb-2"
+          >
+            {formTitle} Processing Comments:
+          </label>
+          <textarea
+            id="comments"
+            value={comments}
+            onChange={(e) => setComments(e.target.value)}
+            placeholder="Enter your comments here..."
+            rows={3}
+            className="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="bg-green-500 text-white font-medium px-6 py-3 rounded-md hover:bg-green-600 transition-colors duration-300 w-full sm:w-auto"
+        >
+          Submit
+        </button>
+      </form>
+    </div>
+  );
+}
+
+export default BaseForm;
