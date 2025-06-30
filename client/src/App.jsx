@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './components/Dashboard'; 
 import PatientRecordForm from './pages/RecordSheet/PatientRecordForm';
 import SkillAssessmentFlow from './pages/SpeechAndTheropyAssessment/SkillAssessmentFlow';
-
+import PatientRecordList from './pages/RecordSheet/PatientRecordList'; 
 //varsha parts
 
 import "./App.css";
@@ -29,7 +29,13 @@ import CarsProgress from './components/CarsProgress';
 import BcProgress from './components/BcProgress';
 import EditBcEntry from './components/EditBcEntry';
  import EditMfEntry from './components/EditMfEntry';
+import ViewPatientRecord from './pages/RecordSheet/ViewPatientRecord';
 
+
+//kujinsika parts
+import DSM5Form from './pages/DSM5/DSM5Form';
+import SnapForm from './pages/SNAP/SnapForm';
+import SubmittedSnapFormsList from './pages/SNAP/SubmittedSnapFormsList';
 
 function App() {
   return (
@@ -38,7 +44,10 @@ function App() {
         <Route path="/" element={<Dashboard />}>
           <Route path="/record-sheet" element={<PatientRecordForm />} />
           <Route path="/skill-assessment" element={<SkillAssessmentFlow />} />
-        
+          <Route path="/patient-records" element={<PatientRecordList />} />
+          <Route path="/patient-records/new" element={<PatientRecordForm />} />
+          <Route path="/patient-records/:id" element={<ViewPatientRecord />} />
+          <Route path="/patient-records/edit/:id" element={<PatientRecordForm />} />
 
         {/* Varsha */}
          <Route path="/sensory-profile-fill-form" element={<SensoryProfileCreatePage />}/>
@@ -66,6 +75,12 @@ function App() {
         <Route path="/editm/:id" element={<EditMfEntry/>} />
 
 
+
+        {/*Kujinsika parts */}
+       
+        <Route path = "/DSM5Form" element = {<DSM5Form />} />
+        <Route path = "/submitted-forms" element = {<SnapForm />} />
+        <Route path = "/SnapForm" element = {<SubmittedSnapFormsList />} />
 
           <Route path="*" element={
             <div className="flex justify-center items-center h-full">

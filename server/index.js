@@ -1,18 +1,18 @@
-// --- Corrected Code ---
-
-// 1. Load environment variables at the very top, using CommonJS syntax.
 require('dotenv').config();
+const mongoose = require("mongoose");
 
-// 2. Use CommonJS require() for all module imports to be consistent.
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-// Import all route files using CommonJS require()
+
 const therapyAssessmentRoutes = require('./routes/therapyAssessmentRoutes');
 const medicalAssessmentRoutes = require('./routes/medicalAssessmentRoutes');
 const patientRecordsRouter = require('./routes/patientRecords');
 const assessmentRoutes = require('./routes/assessmentRoutes');
+
+
 
 // Mathuja's routes
 const ChildRoutes = require('./routes/ChildRoutes.js');
@@ -37,7 +37,7 @@ app.use('/api/therapyAssessments', therapyAssessmentRoutes);
 app.use('/api/medicalAssessments', medicalAssessmentRoutes);
 app.use('/api/patientRecords', patientRecordsRouter);
 app.use('/api/assessments', assessmentRoutes);
-
+app.use('/api/patientRecords', patientRecordsRouter);
 
 // Mathuja's Routes
 app.use('/api/child', ChildRoutes);
@@ -45,6 +45,10 @@ app.use('/api/carsform', CarsformRoutes);
 app.use('/api/mflow', MflowchartRoutes);
 app.use('/api/bc', BcRoutes);
 
+
+//Kujinsika's routes
+app.use("/api/snapforms", require("./routes/SnapRoutes"));
+app.use("/api/dsm5forms", require("./routes/DSM5Routes"));
 
 // Basic Root Route
 app.get('/', (req, res) => {

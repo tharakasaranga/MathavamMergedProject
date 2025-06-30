@@ -1,40 +1,17 @@
-// D:\Computer Science - University of Jaffna\3rd Year\Group Project\Mathavam Project\server\routes\patientRecords.js
+// D:\Computer Science - University of Jaffna\3rd Year\Group Project\Mathavam Project\backend\routes\patientRecords.js
 
 const express = require('express');
 const router = express.Router();
-const PatientRecord = require('../models/PatientRecord'); // Import the PatientRecord model
-
-// POST /api/patientRecords - Create a new patient record
-router.post('/', async (req, res) => {
-    try {
-        const newRecord = new PatientRecord(req.body);
-        await newRecord.save();
-        res.status(201).json({ message: 'Patient record created successfully!', record: newRecord });
-    } catch (err) {
-        if (err.code === 11000) { // Duplicate key error (e.g., childNo already exists)
-            return res.status(400).json({ message: 'Child No already exists. Please use a unique Child No.' });
-        }
-        // Handle Mongoose validation errors
-        if (err.name === 'ValidationError') {
-            let errors = {};
-            Object.keys(err.errors).forEach((key) => {
-                errors[key] = err.errors[key].message;
-            });
-            return res.status(400).json({ message: 'Validation Error', errors });
-        }
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
+const PatientRecord = require('../models/PatientRecord'); // Ensure correct path to your model
 
 // GET /api/patientRecords - Get all patient records
 router.get('/', async (req, res) => {
     try {
-        const records = await PatientRecord.find();
+        const records = await PatientRecord.find({}); // Fetch all records
         res.status(200).json(records);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Error fetching all patient records:', err);
+        res.status(500).json({ message: 'Server error fetching records', error: err.message });
     }
 });
 
@@ -47,36 +24,54 @@ router.get('/:id', async (req, res) => {
         }
         res.status(200).json(record);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error(`Error fetching patient record with ID ${req.params.id}:`, err);
+        if (err.kind === 'ObjectId') { // Handle invalid MongoDB ID format
+            return res.status(400).json({ message: 'Invalid record ID format' });
+        }
+        res.status(500).json({ message: 'Server error fetching record', error: err.message });
+    }
+});
+
+// POST /api/patientRecords - Create a new patient record
+router.post('/', async (req, res) => {
+    try {
+        const newRecord = new PatientRecord(req.body);
+        const savedRecord = await newRecord.save();
+        res.status(201).json(savedRecord);
+    } catch (err) {
+        console.error('Error saving patient record:', err);
+        // More specific error handling for validation if Mongoose validation is used
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ message: err.message, errors: err.errors });
+        }
+        res.status(400).json({ message: 'Error saving patient record', error: err.message });
     }
 });
 
 // PUT /api/patientRecords/:id - Update a patient record by ID
 router.put('/:id', async (req, res) => {
     try {
+        // { new: true } returns the updated document
+        // { runValidators: true } runs Mongoose schema validators on update
         const updatedRecord = await PatientRecord.findByIdAndUpdate(
             req.params.id,
             req.body,
-            { new: true, runValidators: true } // Return the updated document and run schema validators
+            { new: true, runValidators: true }
         );
+
         if (!updatedRecord) {
             return res.status(404).json({ message: 'Patient record not found' });
         }
-        res.status(200).json({ message: 'Patient record updated successfully!', record: updatedRecord });
+        res.status(200).json(updatedRecord);
     } catch (err) {
-        if (err.code === 11000) { // Duplicate key error (e.g., childNo already exists)
-            return res.status(400).json({ message: 'Child No already exists. Please use a unique Child No.' });
+        console.error(`Error updating patient record with ID ${req.params.id}:`, err);
+        if (err.kind === 'ObjectId') {
+            return res.status(400).json({ message: 'Invalid record ID format' });
         }
         if (err.name === 'ValidationError') {
-            let errors = {};
-            Object.keys(err.errors).forEach((key) => {
-                errors[key] = err.errors[key].message;
-            });
-            return res.status(400).json({ message: 'Validation Error', errors });
+            return res.status(400).json({ message: err.message, errors: err.errors });
         }
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error updating record', error: err.message });
     }
 });
 
@@ -84,15 +79,18 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const deletedRecord = await PatientRecord.findByIdAndDelete(req.params.id);
+
         if (!deletedRecord) {
             return res.status(404).json({ message: 'Patient record not found' });
         }
-        res.status(200).json({ message: 'Patient record deleted successfully!' });
+        res.status(200).json({ message: 'Patient record deleted successfully' });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error(`Error deleting patient record with ID ${req.params.id}:`, err);
+        if (err.kind === 'ObjectId') {
+            return res.status(400).json({ message: 'Invalid record ID format' });
+        }
+        res.status(500).json({ message: 'Server error deleting record', error: err.message });
     }
 });
-
 
 module.exports = router;
