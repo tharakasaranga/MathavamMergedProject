@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import PatientRecordForm from './pages/RecordSheet/PatientRecordForm';
 import SkillAssessmentFlow from './pages/SpeechAndTheropyAssessment/SkillAssessmentFlow';
 import PatientRecordList from './pages/RecordSheet/PatientRecordList'; 
+import TherapyAssessmentList from './pages/SpeechAndTheropyAssessment/TherapyAssessmentList';
 //varsha parts
 
 import "./App.css";
@@ -48,6 +49,14 @@ function App() {
           <Route path="/patient-records/new" element={<PatientRecordForm />} />
           <Route path="/patient-records/:id" element={<ViewPatientRecord />} />
           <Route path="/patient-records/edit/:id" element={<PatientRecordForm />} />
+          <Route path="/therapy-assessments" element={<TherapyAssessmentList />} />
+
+          {/*
+                  <Route path="/therapy-assessments/:id" element={<ViewTherapyAssessment />} />
+        <Route path="/therapy-assessments/edit/:id" element={<EditTherapyAssessment />} />
+        <Route path="/therapy-assessments/add" element={<TherapyAssessment />} /> 
+          
+          */}
 
         {/* Varsha */}
          <Route path="/sensory-profile-fill-form" element={<SensoryProfileCreatePage />}/>
