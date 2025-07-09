@@ -67,7 +67,7 @@ const PatientRecordList = () => {
 
       <div className="flex justify-end mb-4">
         <Link
-          to="/patient-records/new"
+          to="/dashboard/record-sheet"
           className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200"
         >
           Add New Record

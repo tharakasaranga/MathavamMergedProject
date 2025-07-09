@@ -11,14 +11,16 @@ const therapyAssessmentRoutes = require('./routes/therapyAssessmentRoutes');
 const medicalAssessmentRoutes = require('./routes/medicalAssessmentRoutes');
 const patientRecordsRouter = require('./routes/patientRecords');
 const assessmentRoutes = require('./routes/assessmentRoutes');
-
-
+const appointmentRoutes = require('./routes/appointments'); 
+const userRoutes = require('./routes/userRoutes');
 
 // Mathuja's routes
 const ChildRoutes = require('./routes/ChildRoutes.js');
 const CarsformRoutes = require('./routes/CarsformRoutes.js');
 const MflowchartRoutes = require('./routes/MflowchartRoutes.js');
 const BcRoutes = require('./routes/BcRoutes.js');
+
+const authRoutes = require('./routes/authRoutes'); 
 
 
 const app = express();
@@ -38,6 +40,10 @@ app.use('/api/medicalAssessments', medicalAssessmentRoutes);
 app.use('/api/patientRecords', patientRecordsRouter);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/patientRecords', patientRecordsRouter);
+app.use('/api/appointments', appointmentRoutes); 
+app.use('/api/users', userRoutes); 
+app.use('/api/auth', authRoutes);  //api/auth/login
+
 
 // Mathuja's Routes
 app.use('/api/child', ChildRoutes);

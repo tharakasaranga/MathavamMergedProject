@@ -1,13 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Import useEffect
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faBell, faCog, faSignOutAlt, faChartBar, faUsers, faHome, faSearch, faUserCircle, faNotesMedical, faUserGraduate, faQrcode, faHeartbeat, faFolderOpen, faClipboardList, faCalendarCheck,
+import { faBars, faBell, faCog, faSignOutAlt, faChartBar, faUsers, faHome, faSearch, faNotesMedical, faUserGraduate, faQrcode, faHeartbeat, faFolderOpen, faClipboardList, faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
 function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [loggedInUser, setLoggedInUser] = useState(null); // State to store logged-in user info
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    // Retrieve user information from localStorage when the component mounts
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setLoggedInUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+        // Clear invalid user data and log out if parsing fails
+        handleLogout();
+      }
+    } else {
+      // If no user data, redirect to login
+      navigate("/");
+    }
+  }, [navigate]); // Depend on navigate to avoid lint warnings and ensure effect runs if navigate changes
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -18,55 +36,65 @@ function Dashboard() {
   };
 
   const handleSkillAssessmentForms = () => {
-    navigate("/forms");
+    navigate("/dashboard/forms");
   };
 
   const handleRecordingSheet = () => {
-    navigate("/record-sheet");
+    navigate("/dashboard/patient-records");
   };
 
+  const handleAppointmentManagement = () => {
+    navigate("/dashboard/appointments");
+  }
+
   const handleParentalTraining = () => {
-    navigate("/parental-training");
+    navigate("/dashboard/parental-training");
   };
 
   const handleQRAttendance = () => {
-    navigate("/qr-attendance");
+    navigate("/dashboard/qr-attendance");
   };
 
   const handleTherapyTracking = () => {
-    navigate("/therapy-tracking");
+    navigate("/dashboard/therapy-tracking");
   };
 
   const handleDocuments = () => {
-    navigate("/documents");
+    navigate("/dashboard/documents");
   };
 
   const handleTherapySessions = () => {
-    navigate("/therapy-sessions");
+    navigate("/dashboard/therapy-sessions");
   };
 
   const handleReports = () => {
-    navigate("/reports");
+    navigate("/dashboard/reports");
   };
 
   const handleManageUsers = () => {
-    navigate("/manage-users");
+    navigate("/dashboard/manage-users");
   };
 
+  const handleAddNewUser = () => {
+    navigate("manage-users/add");
+  }
   const handleLogout = () => {
     console.log("Logging out...");
-    navigate("/login");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setLoggedInUser(null); // Clear user state
+    navigate("/");
   };
 
   const isActive = (path) => {
-    if (path === "/skill-assessment") {
+    if (path === "/dashboard/skill-assessment") {
       return (
-        location.pathname === "/skill-assessment" ||
-        location.pathname === "/prerequisite-skill" ||
-        location.pathname === "/communication" ||
-        location.pathname === "/language" ||
-        location.pathname === "/speech" ||
-        location.pathname === "/oralmotor-assessment"
+        location.pathname === "/dashboard/skill-assessment" ||
+        location.pathname === "/dashboard/prerequisite-skill" ||
+        location.pathname === "/dashboard/communication" ||
+        location.pathname === "/dashboard/language" ||
+        location.pathname === "/dashboard/speech" ||
+        location.pathname === "/dashboard/oralmotor-assessment"
       );
     }
     return location.pathname === path;
@@ -76,7 +104,7 @@ function Dashboard() {
     <div className="flex h-screen bg-gray-50 font-sans text-gray-800 antialiased overflow-hidden">
       {/* Sidebar */}
       <aside className={`bg-gradient-to-b from-indigo-700 to-purple-800 text-white transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? "w-80" : "w-20"} flex flex-col shadow-2xl relative z-20`}>
+           isSidebarOpen ? "w-80" : "w-20"} flex flex-col shadow-2xl relative z-20`}>
 
         <div className="flex items-center justify-center h-20 bg-indigo-900 bg-opacity-30 relative px-4">
           {isSidebarOpen ? (
@@ -107,69 +135,65 @@ function Dashboard() {
             onClick={handleHome}
             isActive={isActive("/dashboard")}
           />
+           <NavItem
+            icon={faClipboardList}
+            label="Patient Information"
+            isOpen={isSidebarOpen}
+            onClick={handleRecordingSheet}
+            isActive={isActive("/dashboard/patient-records")}
+          />
           <NavItem
             icon={faNotesMedical}
             label="Assessment Forms"
             isOpen={isSidebarOpen}
             onClick={handleSkillAssessmentForms}
-            isActive={isActive("/forms")}
-          />
-          <NavItem
-            icon={faClipboardList}
-            label="Recording Sheet"
-            isOpen={isSidebarOpen}
-            onClick={handleRecordingSheet}
-            isActive={isActive("/record-sheet")}
-          />
-          <NavItem
-            icon={faUserGraduate}
-            label="Parental Training"
-            isOpen={isSidebarOpen}
-            onClick={handleParentalTraining}
-            isActive={isActive("/parental-training")}
-          />
-          <NavItem
-            icon={faQrcode}
-            label="QR Attendance"
-            isOpen={isSidebarOpen}
-            onClick={handleQRAttendance}
-            isActive={isActive("/qr-attendance")}
+            isActive={isActive("/dashboard/forms")}
           />
           <NavItem
             icon={faHeartbeat}
             label="Therapy Tracking"
             isOpen={isSidebarOpen}
             onClick={handleTherapyTracking}
-            isActive={isActive("/therapy-tracking")}
-          />
-          <NavItem
-            icon={faFolderOpen}
-            label="Documents"
-            isOpen={isSidebarOpen}
-            onClick={handleDocuments}
-            isActive={isActive("/documents")}
+            isActive={isActive("/dashboard/therapy-tracking")}
           />
           <NavItem
             icon={faCalendarCheck}
-            label="Therapy Sessions"
+            label="Appointment Management"
             isOpen={isSidebarOpen}
-            onClick={handleTherapySessions}
-            isActive={isActive("/therapy-sessions")}
+            onClick={handleAppointmentManagement}
+            isActive={isActive("/dashboard/appointment-management")}
           />
+           <NavItem
+            icon={faQrcode}
+            label="QR Attendance"
+            isOpen={isSidebarOpen}
+            onClick={handleQRAttendance}
+            isActive={isActive("/dashboard/qr-attendance")}
+          />
+           <NavItem
+            icon={faQrcode}
+            label="RDHS"
+            isOpen={isSidebarOpen}
+            onClick={handleQRAttendance}
+            isActive={isActive("/dashboard/qr-attendance")}
+          />
+
           <NavItem
-            icon={faChartBar}
-            label="Reports"
+            icon={faUserGraduate}
+            label="Parental Training"
             isOpen={isSidebarOpen}
-            onClick={handleReports}
-            isActive={isActive("/reports")}
+            onClick={handleParentalTraining}
+            isActive={isActive("/dashboard/parental-training")}
           />
+
           <NavItem
             icon={faUsers}
             label="Manage Users"
             isOpen={isSidebarOpen}
             onClick={handleManageUsers}
-            isActive={isActive("/manage-users")}
+            isActive={isActive("/dashboard/manage-users")}
           />
+
         </nav>
 
         {/* Logout Button */}
@@ -179,7 +203,7 @@ function Dashboard() {
             label="Logout"
             isOpen={isSidebarOpen}
             onClick={handleLogout}
-            isActive={false} // Logout is never active
+            isActive={false}
             isLogout={true}
           />
         </div>
@@ -193,42 +217,40 @@ function Dashboard() {
             <h2 className="text-2xl font-semibold text-gray-800">
               {location.pathname === "/dashboard"
                 ? "Dashboard Overview"
-                : location.pathname.startsWith("/forms")
-                ? "Skill Assessment Forms"
-                : location.pathname === "/record-sheet"
-                ? "Recording Sheet"
-                : location.pathname === "/parental-training"
+                : location.pathname.startsWith("/dashboard/forms")
+                ? "Assessment Forms"
+                : location.pathname === "/dashboard/patient-records"
+                ? "Patient Information"
+                : location.pathname === "/dashboard/parental-training"
                 ? "Parental Training"
-                : location.pathname === "/qr-attendance"
+                : location.pathname === "/dashboard/qr-attendance"
                 ? "QR Attendance"
-                : location.pathname === "/therapy-tracking"
+                : location.pathname === "/dashboard/therapy-tracking"
                 ? "Therapy Tracking"
-                : location.pathname === "/documents"
-                ? "Documents"
-                : location.pathname === "/therapy-sessions"
+                : location.pathname === "/dashboard/therapy-sessions"
                 ? "Therapy Sessions"
-                : location.pathname === "/reports"
-                ? "Reports"
-                : location.pathname === "/manage-users"
+                : location.pathname === "/dashboard/appointments"
+                ? "Appointment Management"
+                : location.pathname === "/dashboard/manage-users"
                 ? "Manage Users"
                 : "Welcome"}
             </h2>
-            <div className="relative ml-8 group">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="pl-10 pr-4 py-2.5 rounded-full border border-gray-200 bg-gray-50 focus:border-indigo-400 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm w-72 transition-all duration-300 ease-in-out focus:w-80 shadow-inner outline-none group-hover:border-gray-300"
-              />
-              <FontAwesomeIcon
-                icon={faSearch}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-indigo-500 transition-colors duration-200"
-              />
-            </div>
+          
           </div>
           <div className="flex items-center space-x-3">
             <IconButton icon={faBell} />
             <IconButton icon={faCog} />
-            <IconButton icon={faUserCircle} />
+            {/* Display user's name instead of faUserCircle icon */}
+            {loggedInUser ? (
+              <div className="flex items-center px-3 py-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-sm shadow-inner cursor-pointer hover:bg-indigo-100 transition-colors duration-200">
+                Hi, {loggedInUser.firstName} {loggedInUser.lastName}
+              </div>
+            ) : (
+              // Optionally show a placeholder or nothing if user is not loaded yet
+              <div className="flex items-center px-3 py-2 rounded-full bg-gray-200 text-gray-700 font-semibold text-sm">
+                Loading User...
+              </div>
+            )}
           </div>
         </header>
 
@@ -256,7 +278,7 @@ const NavItem = ({ icon, label, isOpen, onClick, isActive, isLogout = false }) =
       relative overflow-hidden
     `}
   >
-    <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-200"></span> {/* Subtle hover overlay */}
+    <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-200"></span>
     <FontAwesomeIcon
       icon={icon}
       className={`${

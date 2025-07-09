@@ -5,19 +5,19 @@ const forms = [
   { 
     name: "Patient Record Form", 
     newPath: "../record-sheet", 
-    previousPath: "/patient-record-entries", // Assuming a path for previous entries
+    previousPath: "/patient-records",
     progressPath: null // No specific progress path provided
   },
   { 
     name: "Skill Assessment Flow", 
     newPath: "../skill-assessment", 
-    previousPath: "/skill-assessment-entries", // Assuming a path for previous entries
+    previousPath: "/therapy-assessments-list", 
     progressPath: null 
   },
   { 
-    name: "Sensory Profile (Create)", 
+    name: "Sensory Profile", 
     newPath: "../sensory-profile-fill-form", 
-    previousPath: "/sensory-profile/read", // Using read path as view previous
+    previousPath: "/sensory-profile/read", 
     progressPath: null 
   },
   { 
