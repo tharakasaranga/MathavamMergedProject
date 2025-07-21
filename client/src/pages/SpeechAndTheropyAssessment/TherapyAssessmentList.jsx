@@ -49,7 +49,7 @@ const TherapyAssessmentList = () => {
     <div className="container mx-auto p-6 bg-white rounded-lg shadow-xl my-8">
       <h2 className="text-3xl font-bold text-center text-blue-800 mb-8">Therapy Assessment Records</h2>
       <Link
-        to="/therapy-assessments/add" // Assuming a route for adding new assessments
+        to="../skill-assessment" // Assuming a route for adding new assessments
         className="mb-6 inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-md shadow-md transition duration-300"
       >
         Add New Assessment
@@ -92,13 +92,13 @@ const TherapyAssessmentList = () => {
                   </td>
                   <td className="py-4 px-6 whitespace-nowrap text-sm font-medium">
                     <Link
-                      to={`/therapy-assessments/${assessment._id}`}
+                      to={`/dashboard/therapy-assessments/${assessment._id}`}
                       className="text-blue-600 hover:text-blue-900 mr-4"
                     >
                       View
                     </Link>
                     <Link
-                      to={`/therapy-assessments/edit/${assessment._id}`}
+                      to={`dashboard/therapy-assessments/edit/${assessment._id}`}
                       className="text-indigo-600 hover:text-indigo-900 mr-4"
                     >
                       Edit

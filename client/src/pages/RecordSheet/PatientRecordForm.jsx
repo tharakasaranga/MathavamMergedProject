@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useParams } from 'react-router-dom'; // මෙය අලුතින් එකතු කරන ලදි
 
 import Part1PatientInfo from './Part1PatientInfo';
 import Part2History from './Part2History';
@@ -12,7 +11,6 @@ import Part4Management from './Part4Management';
 
 const PatientRecordForm = () => {
     const navigate = useNavigate();
-    const { id } = useParams(); // URL එකෙන් ID එක ලබා ගනී (edit කිරීම සඳහා)
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState(() => {
         const savedData = localStorage.getItem('patientRecordFormData');
@@ -22,33 +20,6 @@ const PatientRecordForm = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
 
-    // localStorage වෙතින් දත්ත load කිරීමට හෝ ID එකක් ඇත්නම් පවතින record එක fetch කර ගැනීමට
-    useEffect(() => {
-        if (id) {
-            const fetchRecord = async () => {
-                setLoading(true);
-                try {
-                    const response = await axios.get(`http://localhost:5000/api/patientRecords/${id}`);
-                    setFormData(response.data);
-                    localStorage.setItem('patientRecordFormData', JSON.stringify(response.data));
-                    setError(null); // පෙර තිබූ error ඉවත් කරයි
-                } catch (err) {
-                    console.error(`Error fetching record with ID ${id}:`, err);
-                    setError('Failed to load patient record for editing. It might not exist.');
-                    navigate('/patient-records'); // Record එකක් සොයාගත නොහැකි නම් ලැයිස්තු පිටුවට යොමු කරයි
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchRecord();
-        } else {
-            // නව records සඳහා, localStorage හි ඇති දත්ත ඉවත් කරයි (ඇත්නම්)
-            localStorage.removeItem('patientRecordFormData');
-            setFormData({}); // නව entry එකක් සඳහා form එක reset කරයි
-        }
-    }, [id, navigate]); // ID වෙනස් වුවහොත් හෝ navigate function වෙනස් වුවහොත් නැවත ක්‍රියාත්මක වේ
-
-    // formData වෙනස් වන විට localStorage වෙත දත්ත save කරයි (multi-step persistence සඳහා)
     useEffect(() => {
         localStorage.setItem('patientRecordFormData', JSON.stringify(formData));
     }, [formData]);
@@ -61,20 +32,33 @@ const PatientRecordForm = () => {
         }));
     };
 
+    // MODIFIED handleNestedChange function
     const handleNestedChange = (path, e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prevData => {
-            const newState = { ...prevData };
-            const pathParts = path.split('.');
-            let current = newState;
-            for (let i = 0; i < pathParts.length - 1; i++) {
-                if (!current[pathParts[i]]) {
-                    current[pathParts[i]] = {};
+            // Create a deep copy of the previous data to avoid direct mutation
+            const newData = { ...prevData };
+            
+            // Split the path into individual keys (e.g., 'reviewOfSystem.growthWeightProblems' -> ['reviewOfSystem', 'growthWeightProblems'])
+            const keys = path.split('.');
+            
+            // Traverse the newData object to reach the target nested object
+            let current = newData;
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                if (!current[key]) {
+                    current[key] = {}; // Initialize if the path doesn't exist
                 }
-                current = current[pathParts[i]];
+                if (i < keys.length - 1) { // If not the last key in the path
+                    current = current[key];
+                } else { // This is the last key, where the target object resides
+                    current[key] = {
+                        ...current[key], // Spread existing properties of the target object
+                        [name]: type === 'checkbox' ? checked : value // Update the specific field
+                    };
+                }
             }
-            current[name] = type === 'checkbox' ? checked : value;
-            return newState;
+            return newData;
         });
     };
 
@@ -93,23 +77,22 @@ const PatientRecordForm = () => {
         setSuccess(false);
 
         try {
-            let response;
-            if (id) {
-                // පවතින record එකක් යාවත්කාලීන කරයි (UPDATE)
-                response = await axios.put(`http://localhost:5000/api/patientRecords/${id}`, formData);
-                alert('Patient record updated successfully!');
-            } else {
-                // නව record එකක් නිර්මාණය කරයි (CREATE)
-                response = await axios.post('http://localhost:5000/api/patientRecords', formData);
-                alert('Patient record submitted successfully!');
-            }
+            const backendUrl = 'http://localhost:5000/api/patientRecords';
+            const response = await axios.post(backendUrl, formData);
+            console.log('Record saved successfully:', response.data);
             setSuccess(true);
-            setLoading(false);
-            localStorage.removeItem('patientRecordFormData'); // සාර්ථකව submit/update කිරීමෙන් පසු form data ඉවත් කරයි
-            navigate('/patient-records'); // සාර්ථක වීමෙන් පසු ලැයිස්තු පිටුවට යොමු කරයි
+            
+            localStorage.removeItem('patientRecordFormData');
+            setFormData({});
+            setStep(1);
+
+            alert('Patient record submitted successfully!');
+
         } catch (err) {
-            console.error('Error submitting patient record:', err.response ? err.response.data : err.message);
-            setError(err.response?.data?.message || 'Failed to submit patient record. Please check your input.');
+            console.error('Error submitting form:', err.response ? err.response.data : err.message);
+            setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
+            alert('Error submitting form: ' + (err.response ? err.response.data.message : err.message));
+        } finally {
             setLoading(false);
         }
     };
@@ -118,40 +101,40 @@ const PatientRecordForm = () => {
         switch (step) {
             case 1:
                 return (
-                    <Part1PatientInfo
-                        formData={formData}
-                        handleChange={handleChange}
-                        nextStep={nextStep}
+                    <Part1PatientInfo 
+                        formData={formData} 
+                        handleChange={handleChange} 
+                        nextStep={nextStep} 
                     />
                 );
             case 2:
                 return (
-                    <Part2History
-                        formData={formData}
-                        handleChange={handleChange}
+                    <Part2History 
+                        formData={formData} 
+                        handleChange={handleChange} 
                         handleNestedChange={handleNestedChange}
-                        nextStep={nextStep}
-                        prevStep={prevStep}
+                        nextStep={nextStep} 
+                        prevStep={prevStep} 
                     />
                 );
             case 3:
                 return (
-                    <Part3Diagnosis
-                        formData={formData}
-                        handleChange={handleChange}
+                    <Part3Diagnosis 
+                        formData={formData} 
+                        handleChange={handleChange} 
                         handleNestedChange={handleNestedChange}
-                        nextStep={nextStep}
-                        prevStep={prevStep}
+                        nextStep={nextStep} 
+                        prevStep={prevStep} 
                     />
                 );
             case 4:
                 return (
-                    <Part4Management
-                        formData={formData}
-                        handleChange={handleChange}
+                    <Part4Management 
+                        formData={formData} 
+                        handleChange={handleChange} 
                         handleNestedChange={handleNestedChange}
-                        prevStep={prevStep}
-                        handleSubmit={handleSubmit}
+                        prevStep={prevStep} 
+                        handleSubmit={handleSubmit} 
                         loading={loading}
                         error={error}
                     />

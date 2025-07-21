@@ -11,7 +11,7 @@ const forms = [
   { 
     name: "Skill Assessment Flow", 
     newPath: "../skill-assessment", 
-    previousPath: "/therapy-assessments-list", 
+    previousPath: "../therapy-assessments-list", 
     progressPath: null 
   },
   { 

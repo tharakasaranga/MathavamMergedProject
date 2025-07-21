@@ -13,6 +13,7 @@ const patientRecordsRouter = require('./routes/patientRecords');
 const assessmentRoutes = require('./routes/assessmentRoutes');
 const appointmentRoutes = require('./routes/appointments'); 
 const userRoutes = require('./routes/userRoutes');
+const doctorAppointmentsRoute = require('./routes/doctorAppointments');
 
 // Mathuja's routes
 const ChildRoutes = require('./routes/ChildRoutes.js');
@@ -43,7 +44,7 @@ app.use('/api/patientRecords', patientRecordsRouter);
 app.use('/api/appointments', appointmentRoutes); 
 app.use('/api/users', userRoutes); 
 app.use('/api/auth', authRoutes);  //api/auth/login
-
+app.use('/api/doctor-appointments', doctorAppointmentsRoute); 
 
 // Mathuja's Routes
 app.use('/api/child', ChildRoutes);

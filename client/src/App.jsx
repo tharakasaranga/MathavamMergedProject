@@ -8,6 +8,8 @@ import PatientRecordList from './pages/RecordSheet/PatientRecordList';
 import LoginForm from './pages/Auth/LoginForm';
 import ManageUser from './pages/ManageUsers/ManageUser';
 import AddNewUser from './pages/ManageUsers/AddNewUser';
+import TherapyAssessmentList from './pages/SpeechAndTheropyAssessment/TherapyAssessmentList';
+import ViewTherapyAssessment from './pages/SpeechAndTheropyAssessment/ViewTherapyAssessment';
 //varsha parts
 
 import "./App.css";
@@ -33,11 +35,15 @@ import BcProgress from './components/BcProgress';
 import EditBcEntry from './components/EditBcEntry';
 import EditMfEntry from './components/EditMfEntry';
 import ViewPatientRecord from './pages/RecordSheet/ViewPatientRecord';
+
+
+
 import AppointmentManagement from './pages/Appointment/AppointmentManagement';
 import DoctorAppointmentBooking from './pages/Appointment/DoctorAppointmentBooking';
-// New imports for appointment forms
-import SessionBookingForm from './pages/Appointment/SessionBookingForm';
 import ServiceBookingForm from './pages/Appointment/ServiceBookingForm';
+import SessionBookingForm from './pages/Appointment/SessionBookingForm'; // If you keep it
+import PractitionerCalendar from './pages/Appointment/PractitionerCalendar'; // NEW
+import AllAppointmentsList from './pages/Appointment/AllAppointmentsList'; // Will create this next for Admin view
 
 
 function App() {
@@ -62,13 +68,18 @@ function App() {
           <Route path="patient-records/edit/:id" element={<PatientRecordForm />} />
           <Route path="manage-users" element={<ManageUser />} />
           <Route path="manage-users/add" element={<AddNewUser />} />
-          {/* Updated Appointment Routes */}
-          <Route path="appointments" element={<AppointmentManagement />} /> {/* This route will display the type selection */}
-          <Route path="appointments/session-booking" element={<SessionBookingForm />} />
+          <Route path="appointments" element={<AppointmentManagement />} />
+          <Route path="appointments/doctor-booking" element={<DoctorAppointmentBooking />} />
           <Route path="appointments/service-booking" element={<ServiceBookingForm />} />
-          <Route path="appointments/doctor-booking" element={<DoctorAppointmentBooking />} /> {/* Already existing DoctorAppointmentBooking */}
+          {/* Conditionally include if you decide to keep SessionBookingForm distinct */}
+          <Route path="appointments/session-booking" element={<SessionBookingForm />} /> 
+          <Route path="therapy-assessments-list" element={<TherapyAssessmentList />} /> 
+          <Route path="therapy-assessments/:id" element={<ViewTherapyAssessment />} /> 
 
 
+          {/* New Appointment Routes for Specific User Types */}
+          <Route path="appointments/my-schedule" element={<PractitionerCalendar />} /> {/* Doctors/Therapists */}
+          <Route path="appointments/all" element={<AllAppointmentsList />} /> {/* Admin/Super Admin (Next Part) */}
           {/* Varsha's Sensory Profile Routes */}
           <Route path="sensory-profile-fill-form" element={<SensoryProfileCreatePage />} />
           <Route path="sensory-profile-view" element={<SensoryProfileReadPage />} />
